@@ -52,14 +52,12 @@ namespace GoldSavings.App.Services
 
                 try
                 {
-                    // Ensure the directory exists
                     string directory = Path.GetDirectoryName(filePath);
                     if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);
                     }
 
-                    // Initialize the Serializer for List<GoldPrice>
                     XmlSerializer serializer = new XmlSerializer(typeof(List<GoldPrice>));
 
                     using (StreamWriter writer = new StreamWriter(filePath))
@@ -72,6 +70,8 @@ namespace GoldSavings.App.Services
                     throw new IOException($"An error occurred while saving XML: {ex.Message}", ex);
                 }
             }
+
+        public List<GoldPrice> LoadPricesFromXml(string filePath) => (List<GoldPrice>)new XmlSerializer(typeof(List<GoldPrice>)).Deserialize(File.OpenRead(filePath));
+    }
 }
 
-}

@@ -28,9 +28,6 @@ class Program
 
         Console.WriteLine($"Retrieved {goldPrices.Count} records. Ready for analysis.");
 
-        
-        // ---------------------
-
         // Step 2: Perform analysis
         GoldAnalysisService analysisService = new GoldAnalysisService(goldPrices);
         var avgPrice = analysisService.GetAveragePrice();
@@ -39,16 +36,13 @@ class Program
         GoldResultPrinter.PrintSingleValue(Math.Round(avgPrice, 2), "Average Gold Price Last Half Year");
 
         //2.a
-        //querry
-        // Top 3 Highest Prices
+        //query
         var top3HighestQuery = (from p in goldPrices
                                 orderby p.Price descending
                                 select p).Take(3).ToList();
 
         GoldResultPrinter.PrintPrices(top3HighestQuery, "Top 3 Highest Gold Prices");
 
-
-        // Top 3 Lowest Prices
         var top3LowestQuery = (from p in goldPrices
                                orderby p.Price ascending
                                select p).Take(3).ToList();
@@ -57,7 +51,6 @@ class Program
 
 
         //method
-        // Top 3 Highest Prices
         var top3HighestMethod = goldPrices
             .OrderByDescending(p => p.Price)
             .Take(3)
@@ -65,7 +58,6 @@ class Program
 
         GoldResultPrinter.PrintPrices(top3HighestMethod, "Top 3 Highest Gold Prices");
 
-        // Top 3 Lowest Prices
         var top3LowestMethod = goldPrices
             .OrderBy(p => p.Price)
             .Take(3)
@@ -74,7 +66,6 @@ class Program
         GoldResultPrinter.PrintPrices(top3LowestMethod, "Top 3 Lowest Gold Prices");
 
         //2.b
-        // 1. Define your purchase (e.g., first trading day of Jan 2020)
         var buyPrice = goldPrices
             .Where(p => p.Date.Year == 2020 && p.Date.Month == 1)
             .OrderBy(p => p.Date)
@@ -82,26 +73,21 @@ class Program
 
         if (buyPrice != null)
         {
-            // 2. Find all days where the profit is > 5%
-            // Formula: ((Current - Buy) / Buy) > 0.05
             var profitableDays = goldPrices
                 .Where(p => p.Date > buyPrice.Date && (p.Price - buyPrice.Price) / buyPrice.Price > 0.05)
                 .ToList();
 
-            // 3. Print the results
             Console.WriteLine($"Bought on {buyPrice.Date:yyyy-MM-dd} at {buyPrice.Price} PLN");
             GoldResultPrinter.PrintPrices(profitableDays, "Days with > 5% Gain");
         }
 
         //2.c
-        // Assuming goldPrices contains all data from 2019-01-01 to 2022-12-31
         var secondTenStart = goldPrices
-            .OrderByDescending(p => p.Price) // Rank by highest price
-            .Skip(10)                        // Skip the first ten (1-10)
-            .Take(3)                         // Take the next three (11, 12, 13)
+            .OrderByDescending(p => p.Price)
+            .Skip(10)                        
+            .Take(3)                         
             .ToList();
 
-        // Print the results
         GoldResultPrinter.PrintPrices(secondTenStart, "Dates Opening the Second Ten (Positions 11-13)");
 
         //2.d
@@ -114,25 +100,21 @@ class Program
                                  AveragePrice = yearGroup.Average(p => p.Price)
                              };
 
-        // Printing the results
         foreach (var item in yearlyAverages)
         {
             Console.WriteLine($"Year: {item.Year} | Average Price: {item.AveragePrice:F2} PLN");
         }
 
         //2.e
-        // Best Buy Date (Global Minimum)
         var bestBuy = goldPrices
             .OrderBy(p => p.Price)
             .First();
 
-        // Best Sell Date (Global Maximum occurring AFTER the buy date)
         var bestSell = goldPrices
             .Where(p => p.Date > bestBuy.Date)
             .OrderByDescending(p => p.Price)
             .First();
 
-        // Calculation
         double profit = bestSell.Price - bestBuy.Price;
         double roi = (profit / bestBuy.Price) * 100;
 
@@ -144,6 +126,28 @@ class Program
         string outputDir = Path.Combine(Environment.CurrentDirectory, "data");
         string outputFile = Path.Combine(outputDir, "goldPrices.xml");
         dataService.SavePricesToXml(goldPrices, outputFile);
+
+
+        //satisfactory
+        //1
+        Func<int, bool> isLeapYear = year => (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+
+        int yearToCheck = DateTime.Now.Year;
+        Console.WriteLine($"Is {yearToCheck} a leap year? {isLeapYear(yearToCheck)}");
+
+        //2
+        var randomGoldList = new RandomizedList<GoldPrice>();
+
+        foreach (var price in top3HighestMethod)
+        {
+            randomGoldList.Add(price);
+        }
+
+        if (!randomGoldList.IsEmpty)
+        {
+            var randomPrice = randomGoldList.Get(2);
+            Console.WriteLine($"Randomly retrieved price: {randomPrice.Price} PLN from date {randomPrice.Date:yyyy-MM-dd}");
+        }
 
     }
 }
